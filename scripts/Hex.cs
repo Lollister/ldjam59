@@ -6,6 +6,8 @@ using Godot;
 
 public partial class Hex : MeshInstance3D
 {
+    [Export] public Label3D NodeLabel { get; set; }
+
     private Vector3 lockedPosition;
 
     private int hoverState => IsSelected ? 2 : (IsHovered ? 1 : 0);
@@ -158,6 +160,7 @@ public partial class Hex : MeshInstance3D
 
     public override void _Ready()
     {
+        NodeLabel.Text = Name.ToString().Replace("_", " ");
         this.lockedPosition = this.Position;
         MakeMaterialUnique(this);
         MakeMaterialUnique(Outline);

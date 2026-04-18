@@ -17,9 +17,6 @@ shader_parameter/outline_width = 1.0
 [sub_resource type="ConvexPolygonShape3D" id="ConvexPolygonShape3D_0th08"]
 points = PackedVector3Array(0, 0.01, 0.5, 0.43, 0.01, 0.25, 0.43, 0.01, -0.25, 0, 0.01, -0.5, -0.43, 0.01, -0.25, -0.43, 0.01, 0.25)
 
-[sub_resource type="CylinderShape3D" id="CylinderShape3D_ky36l"]
-height = 0.4
-
 [sub_resource type="StandardMaterial3D" id="StandardMaterial3D_aqd0d"]
 albedo_color = Color(1, 0.8, 0, 1)
 metallic = 0.3
@@ -33,10 +30,11 @@ top_radius = 0.2
 bottom_radius = 0.2
 height = 0.02
 
-[node name="Hex" type="MeshInstance3D" unique_id=1141399512 node_paths=PackedStringArray("Outline", "Connectors", "StartMarker", "EndMarker")]
+[node name="Hex" type="MeshInstance3D" unique_id=1141399512 node_paths=PackedStringArray("NodeLabel", "Outline", "Connectors", "StartMarker", "EndMarker")]
 material_override = SubResource("StandardMaterial3D_ybivv")
 mesh = ExtResource("2_2eh4c")
 script = ExtResource("3_ky36l")
+NodeLabel = NodePath("DebugLabel")
 Outline = NodePath("Outline")
 Connectors = [NodePath("Connectors/A"), NodePath("Connectors/B"), NodePath("Connectors/C"), NodePath("Connectors/D"), NodePath("Connectors/E"), NodePath("Connectors/F")]
 StartMarker = NodePath("Marker")
@@ -52,16 +50,12 @@ mesh = ExtResource("2_2eh4c")
 [node name="HexPolygon" type="CollisionShape3D" parent="StaticBody3D" unique_id=1589570312]
 shape = SubResource("ConvexPolygonShape3D_0th08")
 
-[node name="Cylinder" type="CollisionShape3D" parent="StaticBody3D" unique_id=176871115]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.19489746, 0)
-shape = SubResource("CylinderShape3D_ky36l")
-disabled = true
-
 [node name="Connectors" type="Node3D" parent="." unique_id=666631471]
 
-[node name="A" type="Node3D" parent="Connectors" unique_id=144841668]
+[node name="A" type="Node3D" parent="Connectors" unique_id=1417258516]
+transform = Transform3D(-0.50000006, 0, 0.8660254, 0, 1, 0, -0.8660254, 0, -0.50000006, 0, 0, 0)
 
-[node name="MeshInstance3D" type="MeshInstance3D" parent="Connectors/A" unique_id=1301153752]
+[node name="MeshInstance3D" type="MeshInstance3D" parent="Connectors/A" unique_id=19474358]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.215, 0.01, 0)
 material_override = SubResource("StandardMaterial3D_aqd0d")
 mesh = SubResource("BoxMesh_aqd0d")
@@ -74,18 +68,17 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.215, 0.01, 0)
 material_override = SubResource("StandardMaterial3D_aqd0d")
 mesh = SubResource("BoxMesh_aqd0d")
 
-[node name="C" type="Node3D" parent="Connectors" unique_id=1417258516]
-transform = Transform3D(-0.50000006, 0, 0.8660254, 0, 1, 0, -0.8660254, 0, -0.50000006, 0, 0, 0)
+[node name="C" type="Node3D" parent="Connectors" unique_id=144841668]
 
-[node name="MeshInstance3D" type="MeshInstance3D" parent="Connectors/C" unique_id=19474358]
+[node name="MeshInstance3D" type="MeshInstance3D" parent="Connectors/C" unique_id=1301153752]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.215, 0.01, 0)
 material_override = SubResource("StandardMaterial3D_aqd0d")
 mesh = SubResource("BoxMesh_aqd0d")
 
-[node name="D" type="Node3D" parent="Connectors" unique_id=257931317]
-transform = Transform3D(-1, 0, -8.742278e-08, 0, 1, 0, 8.742278e-08, 0, -1, 0, 0, 0)
+[node name="D" type="Node3D" parent="Connectors" unique_id=428730433]
+transform = Transform3D(0.49999997, 0, -0.86602545, 0, 1, 0, 0.86602545, 0, 0.49999997, 0, 0, 0)
 
-[node name="MeshInstance3D" type="MeshInstance3D" parent="Connectors/D" unique_id=1688060319]
+[node name="MeshInstance3D" type="MeshInstance3D" parent="Connectors/D" unique_id=1058952301]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.215, 0.01, 0)
 material_override = SubResource("StandardMaterial3D_aqd0d")
 mesh = SubResource("BoxMesh_aqd0d")
@@ -98,10 +91,10 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.215, 0.01, 0)
 material_override = SubResource("StandardMaterial3D_aqd0d")
 mesh = SubResource("BoxMesh_aqd0d")
 
-[node name="F" type="Node3D" parent="Connectors" unique_id=428730433]
-transform = Transform3D(0.49999997, 0, -0.86602545, 0, 1, 0, 0.86602545, 0, 0.49999997, 0, 0, 0)
+[node name="F" type="Node3D" parent="Connectors" unique_id=257931317]
+transform = Transform3D(-1, 0, -8.742278e-08, 0, 1, 0, 8.742278e-08, 0, -1, 0, 0, 0)
 
-[node name="MeshInstance3D" type="MeshInstance3D" parent="Connectors/F" unique_id=1058952301]
+[node name="MeshInstance3D" type="MeshInstance3D" parent="Connectors/F" unique_id=1688060319]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.215, 0.01, 0)
 material_override = SubResource("StandardMaterial3D_aqd0d")
 mesh = SubResource("BoxMesh_aqd0d")
@@ -109,3 +102,9 @@ mesh = SubResource("BoxMesh_aqd0d")
 [node name="Marker" type="MeshInstance3D" parent="." unique_id=1256658302]
 material_override = SubResource("StandardMaterial3D_aqd0d")
 mesh = SubResource("CylinderMesh_aqd0d")
+
+[node name="DebugLabel" type="Label3D" parent="." unique_id=1058478315]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.15451682, 0)
+billboard = 1
+text = "Test"
+font_size = 40

@@ -40,6 +40,10 @@ public partial class CameraInteraction : Camera3D
         if (@event is InputEventMouseButton mouseEvent)
         {
             var hex = GetHexOnCursor();
+            if (hex.State.StateType != Hex.HexStateType.Connection)
+            {
+                return;
+            }
             if (mouseEvent.IsReleased())
             {
                 if (mouseEvent.ButtonIndex == MouseButton.Left && hex != null)
