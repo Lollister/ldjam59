@@ -71,14 +71,14 @@ public partial class GenerateHexes : Node3D
             for (int x = GenerateFromX; x < GenerateToX; x++)
             {
                 PlaceHexAt(x, y);
-            }        
+            }
         }
     }
 
     private void PlaceHexAt(int x, int y)
     {
         var hex = Hex.Instantiate<Node3D>() as Hex;
-        hex.Name = $"Hex_{x}_{y}";   
+        hex.Name = $"Hex_{x}_{y}";
         this.AddChild(hex);
 
         var xPos = StepX * 2 * x;

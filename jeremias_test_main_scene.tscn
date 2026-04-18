@@ -15,23 +15,31 @@ GenerateFromY = -8
 GenerateToX = 12
 GenerateToY = 8
 HeightOffsetFactor = 0.03
-GridManagerNode = NodePath("../Node")
+GridManagerNode = NodePath("../GridManager")
 
-[node name="Node" type="Node" parent="." unique_id=1484143566 node_paths=PackedStringArray("DebugInfo")]
+[node name="GridManager" type="Node" parent="." unique_id=1484143566 node_paths=PackedStringArray("DebugInfo", "DebugButton")]
 script = ExtResource("2_3ooda")
 DebugInfo = NodePath("../CanvasLayer/DebugLabel")
+DebugButton = NodePath("../CanvasLayer/DebugButton")
 
-[node name="Camera3D" type="Camera3D" parent="." unique_id=99254595]
+[node name="Camera3D" type="Camera3D" parent="." unique_id=99254595 node_paths=PackedStringArray("GridManagerNode")]
 transform = Transform3D(0.99999666, -0.0022620088, 0.0012433224, 0, 0.48168606, 0.87634385, -0.0025811885, -0.876341, 0.48168442, 0.4753942, 7.340228, 5.076562)
 script = ExtResource("7_ahhli")
+GridManagerNode = NodePath("../GridManager")
 
 [node name="DirectionalLight3D" type="DirectionalLight3D" parent="Camera3D" unique_id=1135552979]
 
 [node name="CanvasLayer" type="CanvasLayer" parent="." unique_id=993000032]
 
 [node name="DebugLabel" type="Label" parent="CanvasLayer" unique_id=795775713]
-anchors_preset = 15
+anchors_preset = -1
 anchor_right = 1.0
 anchor_bottom = 1.0
+offset_top = 32.0
 grow_horizontal = 2
 grow_vertical = 2
+
+[node name="DebugButton" type="Button" parent="CanvasLayer" unique_id=1015350246]
+offset_right = 8.0
+offset_bottom = 8.0
+text = "Check"

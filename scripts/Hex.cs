@@ -1,7 +1,5 @@
 using System;
-using System.ComponentModel;
-using System.Reflection.Metadata.Ecma335;
-using System.Runtime.CompilerServices;
+using System.Linq;
 using Godot;
 
 public partial class Hex : MeshInstance3D
@@ -28,6 +26,8 @@ public partial class Hex : MeshInstance3D
     [Export] public Node3D EndMarker { get; set; }
 
     [Export] public HexStateType StartType { get; set; }
+
+    public Vector2I Coordinates { get; set; }
 
     public HexState State { get; set; }
 
@@ -113,6 +113,22 @@ public partial class Hex : MeshInstance3D
         }
 
         private int Rotate(int index) => (index + Rotation) % 6;
+
+        public bool IsValidSide(int direction)
+        {
+            if (StateType != HexStateType.Connection)
+            {
+                return true;
+            }
+
+            return ConnectionType switch
+            {
+                0 => (new int[] { Rotate(0), Rotate(1) }).Contains(direction),
+                1 => (new int[] { Rotate(0), Rotate(2) }).Contains(direction),
+                2 => (new int[] { Rotate(0), Rotate(3) }).Contains(direction),
+                _ => false,
+            };
+        }
     }
 
 
@@ -120,6 +136,7 @@ public partial class Hex : MeshInstance3D
     {
         State = state;
         State.UpdateView(Connectors, StartMarker, EndMarker);
+        NodeLabel.Text = Name.ToString().Replace("Hex_", "").Replace("_", " ");
     }
 
     private void RandomizeTile()
@@ -160,7 +177,6 @@ public partial class Hex : MeshInstance3D
 
     public override void _Ready()
     {
-        NodeLabel.Text = Name.ToString().Replace("_", " ");
         this.lockedPosition = this.Position;
         MakeMaterialUnique(this);
         MakeMaterialUnique(Outline);
@@ -249,7 +265,6 @@ public partial class Hex : MeshInstance3D
             return;
 
         const float speed = 2.0f;
-
         var t = speed * (float)delta / totalDistance;
         t = Mathf.Clamp(t, 0, 1);
 

@@ -107,4 +107,4 @@ mesh = SubResource("CylinderMesh_aqd0d")
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.15451682, 0)
 billboard = 1
 text = "Test"
-font_size = 40
+font_size = 48

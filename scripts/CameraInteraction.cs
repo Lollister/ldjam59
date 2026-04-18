@@ -3,6 +3,10 @@ using Godot;
 
 public partial class CameraInteraction : Camera3D
 {
+
+    [Export] public Node GridManagerNode { get; set; }
+    private GridManager GridManager => (GridManager)GridManagerNode;
+
     private Hex GetHexOnCursor()
     {
         var mousePos = GetViewport().GetMousePosition();
@@ -40,9 +44,9 @@ public partial class CameraInteraction : Camera3D
         if (@event is InputEventMouseButton mouseEvent)
         {
             var hex = GetHexOnCursor();
-            if (hex.State.StateType != Hex.HexStateType.Connection)
+            if (hex?.State.StateType != Hex.HexStateType.Connection)
             {
-                return;
+                //return;
             }
             if (mouseEvent.IsReleased())
             {
@@ -82,25 +86,30 @@ public partial class CameraInteraction : Camera3D
                         currentSwapHex = null;
                     }
 
-                    if (currentRotateHex == null)
-                    {
-                        currentRotateHex = hex;
-                        currentRotateHex.IsRotationMode = true;
-                    }
-                    else
-                    {
-                        currentRotateHex.IsRotationMode = false;
-
-                        if (currentRotateHex == hex)
-                        {
-                            currentRotateHex = null;
-                        }
-                        else
-                        {
-                            currentRotateHex = hex;
-                            currentRotateHex.IsRotationMode = true;
-                        }
-                    }
+                    hex.UpdateState(hex.State.Rotated(1));
+                    //if (currentRotateHex == null)
+                    //{
+                    //    currentRotateHex = hex;
+                    //    currentRotateHex.IsRotationMode = true;
+                    //}
+                    //else
+                    //{
+                    //    currentRotateHex.IsRotationMode = false;
+                    //
+                    //    if (currentRotateHex == hex)
+                    //    {
+                    //        currentRotateHex = null;
+                    //    }
+                    //    else
+                    //    {
+                    //        currentRotateHex = hex;
+                    //        currentRotateHex.IsRotationMode = true;
+                    //    }
+                    //}
+                }
+                else if (mouseEvent.ButtonIndex == MouseButton.Middle && hex != null)
+                {
+                    GridManager.Debug(hex);
                 }
             }
             else if (mouseEvent.IsPressed() && currentRotateHex != null)
