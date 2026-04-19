@@ -10,6 +10,8 @@ public partial class GridManager : Node
 
     private readonly Dictionary<(int x, int y), Hex> hexStore = new();
 
+    public int MaxY => hexStore.Any() ? hexStore.Keys.Max(p => p.y) : 0;
+
     public override void _Ready()
     {
         DebugButton.Pressed += () =>
@@ -83,21 +85,15 @@ public partial class GridManager : Node
         var target = GetAt(end.x, end.y);
         var current = GetAt(start.x, start.y);
 
-        GD.Print("");
-        GD.Print("New Search");
         while (current != null)
         {
-            GD.Print($"> Checking {current.Name}");
-
             if (current == target)
             {
-                GD.Print(">> Found");
                 return true;
             }
 
             if (visited.Contains(current))
             {
-                GD.Print(">> Circle");
                 return false;
             }
 
@@ -107,14 +103,11 @@ public partial class GridManager : Node
 
             if (!neighbours.Any())
             {
-                GD.Print(">> Dead End");
                 return false;
             }
 
             current = neighbours.FirstOrDefault();
         }
-
-        GD.Print(">> No Result");
         return false;
     }
 
@@ -158,7 +151,7 @@ public partial class GridManager : Node
         {
             foreach (var hex in result.Path)
             {
-                hex.SetWireColor(Colors.Cyan);
+                hex.SetSolved();
                 hex.State.IsLocked = true;
             }
             

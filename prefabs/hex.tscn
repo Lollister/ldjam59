@@ -3,12 +3,16 @@
 [ext_resource type="Texture2D" uid="uid://dqmow2hpln3ky" path="res://textures/green.png" id="1_ky36l"]
 [ext_resource type="ArrayMesh" uid="uid://djwlhgcdxdmtm" path="res://meshes/hex.obj" id="2_2eh4c"]
 [ext_resource type="Script" uid="uid://dack8jbfrp55w" path="res://scripts/Hex.cs" id="3_ky36l"]
+[ext_resource type="Material" uid="uid://b527e47vf1qi0" path="res://materials/wire_material.tres" id="4_aqd0d"]
+[ext_resource type="Material" uid="uid://b07w0436mx8gp" path="res://materials/wire_material_inactive.tres" id="4_b4vmm"]
+[ext_resource type="Material" uid="uid://c4ane8wmkatgu" path="res://materials/wire_material_solved.tres" id="5_dxvs5"]
+[ext_resource type="Material" uid="uid://bb87qxw1nixvs" path="res://materials/marker_start.tres" id="5_ybivv"]
+[ext_resource type="Material" uid="uid://bybi5dah0vr4a" path="res://materials/outline_yellow.tres" id="6_16k2m"]
+[ext_resource type="Material" uid="uid://cgosyqwipsxb" path="res://materials/marker_end.tres" id="8_fjrkg"]
+[ext_resource type="Material" uid="uid://ctknnlmcoija4" path="res://materials/outline_green.tres" id="10_xpe1p"]
 
 [sub_resource type="StandardMaterial3D" id="StandardMaterial3D_aqd0d"]
 albedo_texture = ExtResource("1_ky36l")
-
-[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_ybivv"]
-shading_mode = 0
 
 [sub_resource type="ArrayMesh" id="ArrayMesh_ky36l"]
 _surfaces = [{
@@ -24,12 +28,7 @@ _surfaces = [{
 }]
 
 [sub_resource type="ConvexPolygonShape3D" id="ConvexPolygonShape3D_0th08"]
-points = PackedVector3Array(0, 0.01, 0.5, 0.43, 0.01, 0.25, 0.43, 0.01, -0.25, 0, 0.01, -0.5, -0.43, 0.01, -0.25, -0.43, 0.01, 0.25)
-
-[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_b4vmm"]
-albedo_color = Color(255, 204, 0, 1)
-metallic = 0.3
-roughness = 0.2
+points = PackedVector3Array(0, 0.01, 0.5, 0.43, 0.01, 0.25, 0.43, 0.01, -0.25, 0, 0.01, -0.5, -0.43, 0.01, -0.25, -0.43, 0.01, 0.25, 0, -0.02, 0)
 
 [sub_resource type="BoxMesh" id="BoxMesh_aqd0d"]
 size = Vector3(0.43, 0.01, 0.05)
@@ -59,11 +58,6 @@ albedo_color = Color(255, 204, 0, 1)
 metallic = 0.3
 roughness = 0.2
 
-[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_ta8q5"]
-albedo_color = Color(255, 204, 0, 1)
-metallic = 0.3
-roughness = 0.2
-
 [sub_resource type="CylinderMesh" id="CylinderMesh_aqd0d"]
 top_radius = 0.2
 bottom_radius = 0.2
@@ -74,14 +68,23 @@ material_override = SubResource("StandardMaterial3D_aqd0d")
 mesh = ExtResource("2_2eh4c")
 script = ExtResource("3_ky36l")
 NodeLabel = NodePath("DebugLabel")
+Materials = Dictionary[String, Material]({
+"marker_end": ExtResource("8_fjrkg"),
+"marker_start": ExtResource("5_ybivv"),
+"outline_hover": ExtResource("6_16k2m"),
+"outline_swap": ExtResource("10_xpe1p"),
+"wire": ExtResource("4_aqd0d"),
+"wire_inactive": ExtResource("4_b4vmm"),
+"wire_solved": ExtResource("5_dxvs5")
+})
 Outline = NodePath("Outline")
 Connectors = [NodePath("Connectors/A"), NodePath("Connectors/B"), NodePath("Connectors/C"), NodePath("Connectors/D"), NodePath("Connectors/E"), NodePath("Connectors/F")]
-StartMarker = NodePath("Marker")
-EndMarker = NodePath("Marker")
+StartMarker = NodePath("MarkerStart")
+EndMarker = NodePath("MarkerEnd")
 
 [node name="Outline" type="MeshInstance3D" parent="." unique_id=191846574]
 visible = false
-material_override = SubResource("StandardMaterial3D_ybivv")
+material_override = ExtResource("6_16k2m")
 mesh = SubResource("ArrayMesh_ky36l")
 
 [node name="StaticBody3D" type="StaticBody3D" parent="." unique_id=1509353101]
@@ -96,7 +99,7 @@ transform = Transform3D(-0.50000006, 0, 0.8660254, 0, 1, 0, -0.8660254, 0, -0.50
 
 [node name="MeshInstance3D" type="MeshInstance3D" parent="Connectors/A" unique_id=19474358]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.215, 0.01, 0)
-material_override = SubResource("StandardMaterial3D_b4vmm")
+material_override = ExtResource("4_aqd0d")
 mesh = SubResource("BoxMesh_aqd0d")
 
 [node name="B" type="Node3D" parent="Connectors" unique_id=902949528]
@@ -138,8 +141,16 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.215, 0.01, 0)
 material_override = SubResource("StandardMaterial3D_xpe1p")
 mesh = SubResource("BoxMesh_aqd0d")
 
-[node name="Marker" type="MeshInstance3D" parent="." unique_id=1256658302]
-material_override = SubResource("StandardMaterial3D_ta8q5")
+[node name="MarkerStart" type="Node3D" parent="." unique_id=473442629]
+
+[node name="Marker" type="MeshInstance3D" parent="MarkerStart" unique_id=1256658302]
+material_override = ExtResource("5_ybivv")
+mesh = SubResource("CylinderMesh_aqd0d")
+
+[node name="MarkerEnd" type="Node3D" parent="." unique_id=1649428917]
+
+[node name="Marker" type="MeshInstance3D" parent="MarkerEnd" unique_id=2003443318]
+material_override = ExtResource("8_fjrkg")
 mesh = SubResource("CylinderMesh_aqd0d")
 
 [node name="DebugLabel" type="Label3D" parent="." unique_id=1058478315]

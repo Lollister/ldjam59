@@ -1,10 +1,13 @@
 using System;
 using System.Linq;
 using Godot;
+using Godot.Collections;
 
 public partial class Hex : MeshInstance3D
 {
     [Export] public Label3D NodeLabel { get; set; }
+    
+    [Export] public Dictionary<string, Material> Materials { get; set; }
 
     private Vector3 lockedPosition;
 
@@ -50,41 +53,8 @@ public partial class Hex : MeshInstance3D
         public static HexState Random(bool allowEmpty = false) => new HexState(GD.RandRange(allowEmpty ? 0 : 1, 3), GD.RandRange(0, 5), HexStateType.Connection);
         public HexState Rotated(int direction) => new (ConnectionType, (Rotation + 6 + direction) % 6, StateType);
 
-        private static readonly Color wireColor = new(255, 204, 0);
-        private static readonly Color endColor = new(255, 0, 0);
-        private static readonly Color startColor = new(0, 255, 0);
-
-        private void UpdateColor(Node3D[] connectors, Node3D startMarker, Node3D endMarker)
-        {
-            Color color = StateType switch
-            {
-                HexStateType.Connection => wireColor,
-                HexStateType.Start => startColor,
-                HexStateType.End => endColor,
-                _ => Colors.Magenta,
-            };
-
-            foreach (var connector in connectors)
-            {
-                if (connector.GetChild<MeshInstance3D>(0).MaterialOverride is StandardMaterial3D material)
-                {
-                    material.AlbedoColor = color;
-                }
-            }
-            if ((startMarker as MeshInstance3D).MaterialOverride is StandardMaterial3D materialStart)
-            {
-                materialStart.AlbedoColor = color;
-            }
-            if ((endMarker as MeshInstance3D).MaterialOverride is StandardMaterial3D materialEnd)
-            {
-                materialEnd.AlbedoColor = color;
-            }
-        }
-
         public void UpdateView(Node3D[] connectors, Node3D startMarker, Node3D endMarker)
         {
-            UpdateColor(connectors, startMarker, endMarker);
-
             foreach (var connector in connectors)
             {
                 connector.Visible = false;
@@ -150,11 +120,11 @@ public partial class Hex : MeshInstance3D
         UpdateState(HexState.Random());
     }
 
-    public void SetWireColor (Color color)
+    public void SetSolved()
     {
         ApplyForWireMeshes(mesh =>
         {
-            (mesh.MaterialOverride as StandardMaterial3D).AlbedoColor = color;
+            mesh.MaterialOverride = Materials["wire_solved"];
         });
     }
 
@@ -164,21 +134,22 @@ public partial class Hex : MeshInstance3D
         {
             apply(connector.GetChild<MeshInstance3D>(0));
         }
-        apply(StartMarker as MeshInstance3D);
-        apply(EndMarker as MeshInstance3D);
     }
 
-    public Color OutlineColor
+    /// <summary>
+    /// Sets the outline material
+    /// </summary>
+    /// <param name="state">0 = hover, 1 = swap select</param>
+    public void SetOutline(int state)
     {
-        get
+        switch (state)
         {
-            var material = Outline.MaterialOverride as StandardMaterial3D;
-            return material.AlbedoColor;
-        }
-        set
-        {
-            var material = Outline.MaterialOverride as StandardMaterial3D;
-            material.AlbedoColor = value;
+            case 0:
+                Outline.MaterialOverride = Materials["outline_hover"];
+                break;
+            case 1:
+                Outline.MaterialOverride = Materials["outline_swap"];
+                break;
         }
     }
 
@@ -195,9 +166,6 @@ public partial class Hex : MeshInstance3D
     public override void _Ready()
     {
         this.lockedPosition = this.Position;
-        MakeMaterialUnique(this);
-        MakeMaterialUnique(Outline);
-        ApplyForWireMeshes(MakeMaterialUnique);
 
         switch (StartType)
         {
@@ -218,6 +186,14 @@ public partial class Hex : MeshInstance3D
         HoverFrames = Mathf.Max(0, HoverFrames - 1);
         SwapAnimationFrames = Mathf.Max(0, SwapAnimationFrames - 1);
         DropDelay--;
+
+        //if (DropDelay < -300)
+        //{
+        //    //naive "lets just destroy it when it was dropped for X amount of time..."
+        //    //can lead to issues in the GridManager since we now have potentially destroyed references
+        //    QueueFree();
+        //}
+        
     }
 
     public override void _Process(double delta)
@@ -248,17 +224,17 @@ public partial class Hex : MeshInstance3D
         {
             case 1:
                 this.Outline.Visible = true;
-                OutlineColor = Colors.Yellow;
+                SetOutline(0);
                 break;
             case 2:
                 this.Outline.Visible = true;
                 if (IsSwapMode)
                 {
-                    OutlineColor = Colors.Green;
+                    SetOutline(1);
                 }
                 else if (IsRotationMode)
                 {
-                    OutlineColor = Colors.Blue;
+                    //SetOutline(2);
                 }
                 break;
             default:
@@ -272,7 +248,7 @@ public partial class Hex : MeshInstance3D
             0 => lockedPosition,
             1 => lockedPosition + new Vector3(0, 0.1f, 0),
             2 => lockedPosition + new Vector3(0, 0.25f, 0),
-            3 => DropDelay > 0 ? lockedPosition : lockedPosition + new Vector3(0, -20000f, 20000f),
+            3 => DropDelay > 0 ? lockedPosition : lockedPosition + new Vector3(0, -200f, 200f),
             _ => this.Position
         };
 
@@ -301,7 +277,7 @@ public partial class Hex : MeshInstance3D
 
     public void Deactivate()
     {
-        SetWireColor(Colors.DarkOliveGreen);
+        ApplyForWireMeshes(mesh => mesh.MaterialOverride = Materials["wire_inactive"]);
         State.IsLocked = true;
         IsDropped = true;
         DropDelay = (30 - Math.Abs(Coordinates.X) + Coordinates.Y) * 3;

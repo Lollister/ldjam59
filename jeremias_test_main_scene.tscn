@@ -1,6 +1,7 @@
 [gd_scene format=3 uid="uid://x7dlpkxku8e"]
 
-[ext_resource type="Script" uid="uid://dnjibfjbd0qns" path="res://tools/GenerateHexes.cs" id="1_kcv1t"]
+[ext_resource type="Script" uid="uid://ctn4mn061ij00" path="res://scripts/LevelGenerator.cs" id="1_ahhli"]
+[ext_resource type="Script" uid="uid://bj0h66njw0c22" path="res://scripts/DebugLevelGenerator.cs" id="1_lwfei"]
 [ext_resource type="Script" uid="uid://go88h6o5g5a4" path="res://scripts/GridManager.cs" id="2_3ooda"]
 [ext_resource type="PackedScene" uid="uid://6ualdu5e6i8n" path="res://prefabs/hex.tscn" id="2_8njnu"]
 [ext_resource type="Script" uid="uid://chugwva8uliru" path="res://scripts/RoundManager.cs" id="2_skmpo"]
@@ -11,13 +12,25 @@
 
 [node name="Node3D" type="Node3D" unique_id=1314113066]
 
+[node name="DebugLevelGenerator" type="Node" parent="." unique_id=1412276377 node_paths=PackedStringArray("GridManager")]
+script = ExtResource("1_lwfei")
+Hex = ExtResource("2_8njnu")
+GridManager = NodePath("../GridManager")
+
+[node name="LevelGenerator" type="Node" parent="." unique_id=845208469 node_paths=PackedStringArray("GridManagerNode")]
+script = ExtResource("1_ahhli")
+Hex = ExtResource("2_8njnu")
+GridManagerNode = NodePath("../GridManager")
+
 [node name="GridManager" type="Node" parent="." unique_id=1484143566 node_paths=PackedStringArray("DebugInfo", "DebugButton")]
 script = ExtResource("2_3ooda")
 DebugInfo = NodePath("../CanvasLayer/DebugLabel")
 DebugButton = NodePath("../CanvasLayer/DebugButton")
 
-[node name="RoundManager" type="Node" parent="." unique_id=1836318154 node_paths=PackedStringArray("GridManager", "RoundProgress")]
+[node name="RoundManager" type="Node" parent="." unique_id=1836318154 node_paths=PackedStringArray("CameraInteraction", "LevelGenerator", "GridManager", "RoundProgress")]
 script = ExtResource("2_skmpo")
+CameraInteraction = NodePath("../Camera3D")
+LevelGenerator = NodePath("../DebugLevelGenerator")
 GridManager = NodePath("../GridManager")
 RoundProgress = NodePath("../CanvasLayer/ProgressBar")
 RoundDelay = 5
@@ -54,7 +67,7 @@ max_value = 30.0
 show_percentage = false
 
 [node name="Camera3D" type="Camera3D" parent="." unique_id=99254595 node_paths=PackedStringArray("AudioStreamPlayer", "GridManagerNode")]
-transform = Transform3D(0.99999666, -0.0022620088, 0.0012433224, 0, 0.48168606, 0.87634385, -0.0025811885, -0.876341, 0.48168442, 0, 7.34, 12)
+transform = Transform3D(0.99999666, -0.0022620088, 0.0012433226, 0.0012699007, 0.850503, 0.5259687, -0.0022471952, -0.52596533, 0.8505031, 7, 6.6, 10.2)
 script = ExtResource("7_ahhli")
 SoundEffects = Dictionary[String, AudioStream]({
 "bump": ExtResource("5_ahhli"),
@@ -67,13 +80,3 @@ GridManagerNode = NodePath("../GridManager")
 [node name="DirectionalLight3D" type="DirectionalLight3D" parent="Camera3D" unique_id=1135552979]
 
 [node name="AudioStreamPlayer" type="AudioStreamPlayer" parent="Camera3D" unique_id=1955750935]
-
-[node name="HexGen" type="Node3D" parent="." unique_id=422008054 node_paths=PackedStringArray("GridManagerNode")]
-script = ExtResource("1_kcv1t")
-Hex = ExtResource("2_8njnu")
-GenerateFromX = -10
-GenerateFromY = 0
-GenerateToX = 10
-GenerateToY = 16
-HeightOffsetFactor = 0.03
-GridManagerNode = NodePath("../GridManager")

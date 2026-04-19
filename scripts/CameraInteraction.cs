@@ -1,3 +1,4 @@
+using System;
 using System.Linq;
 using Godot;
 
@@ -37,6 +38,16 @@ public partial class CameraInteraction : Camera3D
         }
         return null;
     }
+
+    public void MoveToFocusHexRow(int y)
+    {
+        //this.GlobalPosition = new(7, 6.6f, 3.05f + (y * 1.43f));
+        startLocation = this.GlobalPosition;
+        targetLocation = new(7, 6.6f, 6.45f + (y * 0.75f));
+    }
+
+    private Vector3 startLocation = default;
+    private Vector3 targetLocation = default;
 
     private Hex currentSwapHex = null;
     private Hex currentRotateHex = null;
@@ -143,6 +154,23 @@ public partial class CameraInteraction : Camera3D
         }
         currentRotateHex = hex;
     }
+
+    public override void _Process(double delta)
+    {
+        if (startLocation.DistanceTo(targetLocation) > 0.0001f)
+        {
+            var totalDistance = startLocation.DistanceTo(targetLocation);
+            if (Mathf.Abs(totalDistance) < 0.0001f)
+                return;
+
+            var speed = 3.0f;
+            var t = speed * (float)delta / totalDistance;
+            t = Mathf.Clamp(t, 0, 1);
+
+            Position = Position.Lerp(targetLocation, t);       
+        }
+    }
+
 
     public static bool DebugShowLabels { get; private set; }
 }
