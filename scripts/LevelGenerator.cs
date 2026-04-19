@@ -18,6 +18,12 @@ public partial class LevelGenerator : Node
 	private int BaseLength = 10;
 	private int BaseWidth = 15;
 	
+	public Hex GenerateLevel()
+	{
+		// generiert den nächsten level abschnitt und gibt das nächste ziel zurück
+		return null;
+	}
+
 	public void generateNextLevel()
 	{
 		GD.Print($"Generating level {CurrentLevel}");
