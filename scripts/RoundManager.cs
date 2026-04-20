@@ -1,6 +1,7 @@
 using Godot;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 
 public partial class RoundManager : Node
 {
@@ -17,26 +18,25 @@ public partial class RoundManager : Node
     private float currentDelay = 2;
 
     public int CurrentRound { get; set; } = 0;
+    public bool IsRunning { get; set; }
 
     private Stack<Hex> startHexes = [];
     private Hex endHex = null;
 
     public event Action PlayerLost;
 
-    public override void _Ready()
+    public void StartGame()
     {
-        GD.Print($"olive: {pc(Colors.DarkOliveGreen)}");
-        GD.Print($"cyan: {pc(Colors.Cyan)}");
-
-        string pc(Color c) => $"{c.R * 255},{c.G * 255},{c.B * 255}";
-
         endHex = LevelGenerator.GenerateLevel();
         startHexes.Push(LevelGenerator.StartHex);
-        CameraInteraction.MoveToFocusHexRow(endHex.Coordinates.Y);
+        CameraInteraction.MoveToFocusHexRow(endHex.Coordinates.Y, true);
     }
 
     public override void _PhysicsProcess(double delta)
     {
+        if (!IsRunning)
+            return;
+
         var (success, path) = CheckForSuccess();
 
         if (success)
@@ -48,6 +48,9 @@ public partial class RoundManager : Node
 
     public override void _Process(double delta)
     {
+        if (!IsRunning)
+            return;
+
         if (currentDelay > 0)
         {
             currentDelay = Mathf.Max(0, currentDelay - (float)delta);
@@ -93,7 +96,9 @@ public partial class RoundManager : Node
         var startHex = startHexes.Peek();
         var start = (startHex.Coordinates.X, startHex.Coordinates.Y);
         var end = (endHex.Coordinates.X, endHex.Coordinates.Y);
-        return GridManager.CheckConnection(start, end);
+        var (success, path) = GridManager.CheckConnection(start, end);
+        success &= !path.Any(h => GridManager.IsHexDisrupted(h));
+        return (success, path);
     }
 
     public void StartNextLevel()
@@ -101,10 +106,13 @@ public partial class RoundManager : Node
         CurrentRound++;
         GD.Print($"Starting new round {CurrentRound}");
 
+        var targetRow = endHex.Coordinates.Y;
         startHexes.Push(endHex);
         LevelGenerator.CurrentLevel = CurrentRound;
         endHex = LevelGenerator.GenerateLevel();
-        CameraInteraction.MoveToFocusHexRow(endHex.Coordinates.Y);
+        targetRow += endHex.Coordinates.Y;
+        targetRow /= 2;
+        CameraInteraction.MoveToFocusHexRow(targetRow);
     }
 
 }

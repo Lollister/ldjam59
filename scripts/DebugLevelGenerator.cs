@@ -6,6 +6,9 @@ public partial class DebugLevelGenerator : Node
     [Export] public PackedScene Hex { get; set; }
     [Export] public GridManager GridManager { get; set; }
 
+    [Export] public int LevelEmptyTiles { get; set; } = 5;
+    [Export] public int LevelDisruptors { get; set; } = 10;
+
 
     public Hex StartHex => startHex;
     private Hex startHex;
@@ -25,11 +28,14 @@ public partial class DebugLevelGenerator : Node
         var fromY = GridManager.MaxY + 1;
         var toY = (endHex != null ? endHex.Coordinates.Y + 1 : 0) + baseLength;
 
+        bool instant = endHex == null;
+
         for (int y = fromY; y < toY; y++)
         {
             for (int x = 0; x < baseWidth; x++)
             {
-                PlaceHexAt(x, y);
+                var hex = PlaceHexAt(x, y, instant);
+                hex?.UpdateState(global::Hex.HexState.Random(CurrentLevel >= LevelEmptyTiles));
             }        
         }
 
@@ -38,7 +44,7 @@ public partial class DebugLevelGenerator : Node
             startHex = endHex;
             startHex.UpdateState(global::Hex.HexState.FromState(global::Hex.HexStateType.Start));
             
-            var endX = GD.RandRange(0, baseWidth - 1);
+            var endX = GD.RandRange(4, baseWidth - 5);
             var endY = GD.RandRange(startHex.Coordinates.Y + 2, startHex.Coordinates.Y + baseLength - 2);
 
             endHex = GridManager.GetAt(endX, endY);
@@ -52,26 +58,34 @@ public partial class DebugLevelGenerator : Node
             endHex = GridManager.GetAt(10, 5);
             endHex.UpdateState(global::Hex.HexState.FromState(global::Hex.HexStateType.End));
         }
+
+        if (CurrentLevel >= LevelDisruptors)
+        {
+            var disruptionX = GD.RandRange(0, baseWidth - 1);
+            var disruptionY = GD.RandRange(startHex.Coordinates.Y + 2, startHex.Coordinates.Y + baseLength - 2);
+
+            var disruptionHex = GridManager.GetAt(disruptionX, disruptionY);
+            
+            bool farEnoughFromStart = disruptionHex.Coordinates.DistanceTo(startHex.Coordinates) > 2;
+            bool farEnoughFromEnd = disruptionHex.Coordinates.DistanceTo(endHex.Coordinates) > 2;
+
+            // maybe 3-5 tries?
+            if (farEnoughFromEnd && farEnoughFromStart)
+            {
+                disruptionHex.UpdateState(global::Hex.HexState.FromState(global::Hex.HexStateType.Disruptor));
+            }
+        }
         
         return endHex;
     }
 
-    private void PlaceHexAt(int x, int y)
+    private Hex PlaceHexAt(int x, int y, bool instant = false)
     {
         var hex = Hex.Instantiate<Node3D>();
         hex.Name = $"Hex_{x}_{y}";
         this.AddChild(hex);
 
-        var xPos = stepX * 2 * x;
-        var yPos = GD.Randf() * heightOffsetFactor;
-        var zPos = stepY * y;
-
-        if (y % 2 == 0)
-        {
-            xPos += stepX;
-        }
-
-        hex.GlobalPosition = new(xPos, yPos, zPos);
+        hex.GlobalPosition = GridManager.GetNominalPosition(x, y) + new Vector3(0, GD.Randf() * heightOffsetFactor, 0);
         hex.Owner = GetTree().EditedSceneRoot;
 
         if (hex is Hex hexData)
@@ -79,12 +93,18 @@ public partial class DebugLevelGenerator : Node
             hexData.SetBasePosition(hex.GlobalPosition);
             GridManager.RegisterHex(x, y, hexData);
 
-            var randomOffset = GD.RandRange(5, 15);
+            if (!instant)
+            {
+                var randomOffset = GD.RandRange(5, 15);
 
-            var spawnZ = 15f + randomOffset;
-            var spawnY = -(spawnZ / 2.5f);
+                var spawnZ = 15f + randomOffset;
+                var spawnY = -(spawnZ / 2.5f);
 
-            hex.GlobalPosition += new Vector3(0, spawnY, spawnZ);
+                hex.GlobalPosition += new Vector3(0, spawnY, spawnZ);
+            }
+
+            return hexData;
         }
+        return null;
     }
 }

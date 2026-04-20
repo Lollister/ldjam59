@@ -1,0 +1,9 @@
+[gd_scene format=3 uid="uid://dv1e1762cgg04"]
+
+[ext_resource type="Script" uid="uid://ba5eqq6plpxky" path="res://scripts/TransitionCamera.cs" id="1_ke6ar"]
+
+[node name="CameraTransition" type="Node" unique_id=572744377 node_paths=PackedStringArray("Camera")]
+script = ExtResource("1_ke6ar")
+Camera = NodePath("TransitionCamera")
+
+[node name="TransitionCamera" type="Camera3D" parent="." unique_id=1592170627]

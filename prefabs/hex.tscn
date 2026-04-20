@@ -10,6 +10,11 @@
 [ext_resource type="Material" uid="uid://bybi5dah0vr4a" path="res://materials/outline_yellow.tres" id="6_16k2m"]
 [ext_resource type="Material" uid="uid://cgosyqwipsxb" path="res://materials/marker_end.tres" id="8_fjrkg"]
 [ext_resource type="Material" uid="uid://ctknnlmcoija4" path="res://materials/outline_green.tres" id="10_xpe1p"]
+[ext_resource type="Material" uid="uid://ofqeeex1guqq" path="res://materials/wire_material_disrupted.tres" id="11_2yucs"]
+[ext_resource type="PackedScene" uid="uid://csi3x4h4cdwat" path="res://prefabs/hex_marker_start.tscn" id="11_xpe1p"]
+[ext_resource type="PackedScene" uid="uid://cn75q415sixqf" path="res://prefabs/hex_marker_end.tscn" id="12_ta8q5"]
+[ext_resource type="PackedScene" uid="uid://cuyjbacjhjxrj" path="res://prefabs/hex_marker_disruptor.tscn" id="13_xxmjq"]
+[ext_resource type="PackedScene" uid="uid://l1v4ecjeylky" path="res://prefabs/hex_disruption_effect.tscn" id="15_54wm7"]
 
 [sub_resource type="StandardMaterial3D" id="StandardMaterial3D_aqd0d"]
 albedo_texture = ExtResource("1_ky36l")
@@ -33,12 +38,7 @@ points = PackedVector3Array(0, 0.01, 0.5, 0.43, 0.01, 0.25, 0.43, 0.01, -0.25, 0
 [sub_resource type="BoxMesh" id="BoxMesh_aqd0d"]
 size = Vector3(0.43, 0.01, 0.05)
 
-[sub_resource type="CylinderMesh" id="CylinderMesh_aqd0d"]
-top_radius = 0.2
-bottom_radius = 0.2
-height = 0.02
-
-[node name="Hex" type="MeshInstance3D" unique_id=1141399512 node_paths=PackedStringArray("NodeLabel", "Outline", "Connectors", "StartMarker", "EndMarker")]
+[node name="Hex" type="MeshInstance3D" unique_id=1141399512 node_paths=PackedStringArray("NodeLabel", "Outline", "Connectors", "StartMarker", "EndMarker", "DisruptorMarker", "DisruptionEffect")]
 material_override = SubResource("StandardMaterial3D_aqd0d")
 mesh = ExtResource("2_2eh4c")
 script = ExtResource("3_ky36l")
@@ -49,6 +49,7 @@ Materials = Dictionary[String, Material]({
 "outline_hover": ExtResource("6_16k2m"),
 "outline_swap": ExtResource("10_xpe1p"),
 "wire": ExtResource("4_aqd0d"),
+"wire_disrupted": ExtResource("11_2yucs"),
 "wire_inactive": ExtResource("4_b4vmm"),
 "wire_solved": ExtResource("5_dxvs5")
 })
@@ -56,6 +57,8 @@ Outline = NodePath("Outline")
 Connectors = [NodePath("Connectors/A"), NodePath("Connectors/B"), NodePath("Connectors/C"), NodePath("Connectors/D"), NodePath("Connectors/E"), NodePath("Connectors/F")]
 StartMarker = NodePath("MarkerStart")
 EndMarker = NodePath("MarkerEnd")
+DisruptorMarker = NodePath("MarkerDisruptor")
+DisruptionEffect = NodePath("DisruptionEffect")
 
 [node name="Outline" type="MeshInstance3D" parent="." unique_id=191846574]
 visible = false
@@ -116,17 +119,14 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.215, 0.01, 0)
 material_override = ExtResource("4_aqd0d")
 mesh = SubResource("BoxMesh_aqd0d")
 
-[node name="MarkerStart" type="Node3D" parent="." unique_id=473442629]
+[node name="MarkerStart" parent="." unique_id=543392035 instance=ExtResource("11_xpe1p")]
 
-[node name="Marker" type="MeshInstance3D" parent="MarkerStart" unique_id=1256658302]
-material_override = ExtResource("5_ybivv")
-mesh = SubResource("CylinderMesh_aqd0d")
+[node name="MarkerEnd" parent="." unique_id=458380526 instance=ExtResource("12_ta8q5")]
 
-[node name="MarkerEnd" type="Node3D" parent="." unique_id=1649428917]
+[node name="MarkerDisruptor" parent="." unique_id=173483534 instance=ExtResource("13_xxmjq")]
 
-[node name="Marker" type="MeshInstance3D" parent="MarkerEnd" unique_id=2003443318]
-material_override = ExtResource("8_fjrkg")
-mesh = SubResource("CylinderMesh_aqd0d")
+[node name="DisruptionEffect" parent="." unique_id=1281178481 instance=ExtResource("15_54wm7")]
+visible = false
 
 [node name="DebugLabel" type="Label3D" parent="." unique_id=1058478315]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.15451682, 0)

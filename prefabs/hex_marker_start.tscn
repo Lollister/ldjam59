@@ -1,0 +1,44 @@
+[gd_scene format=3 uid="uid://csi3x4h4cdwat"]
+
+[ext_resource type="Material" uid="uid://bb87qxw1nixvs" path="res://materials/marker_start.tres" id="1_ttoat"]
+[ext_resource type="Texture2D" uid="uid://bhvw8li2saiap" path="res://textures/circle.png" id="2_fxahw"]
+
+[sub_resource type="CylinderMesh" id="CylinderMesh_aqd0d"]
+top_radius = 0.2
+bottom_radius = 0.2
+height = 0.02
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_xextq"]
+transparency = 1
+shading_mode = 0
+vertex_color_use_as_albedo = true
+albedo_color = Color(0, 1, 1, 1)
+albedo_texture = ExtResource("2_fxahw")
+
+[sub_resource type="QuadMesh" id="QuadMesh_ekt48"]
+orientation = 1
+
+[sub_resource type="Curve" id="Curve_6y18a"]
+_data = [Vector2(0, 0), 0.0, 0.0, 0, 0, Vector2(1, 1), 0.0, 0.0, 0, 0]
+point_count = 2
+
+[sub_resource type="Gradient" id="Gradient_25lfl"]
+colors = PackedColorArray(1, 1, 1, 1, 1, 1, 1, 0)
+
+[node name="MarkerStart" type="Node3D" unique_id=543392035]
+
+[node name="Marker" type="MeshInstance3D" parent="." unique_id=1039909086]
+material_override = ExtResource("1_ttoat")
+mesh = SubResource("CylinderMesh_aqd0d")
+
+[node name="CPUParticles3D" type="CPUParticles3D" parent="." unique_id=1097257685]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.1, 0)
+material_override = SubResource("StandardMaterial3D_xextq")
+amount = 4
+lifetime = 2.0
+mesh = SubResource("QuadMesh_ekt48")
+gravity = Vector3(0, 0, 0)
+scale_amount_min = 0.8
+scale_amount_max = 0.8
+scale_amount_curve = SubResource("Curve_6y18a")
+color_ramp = SubResource("Gradient_25lfl")

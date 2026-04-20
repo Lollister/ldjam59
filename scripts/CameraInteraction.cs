@@ -39,11 +39,48 @@ public partial class CameraInteraction : Camera3D
         return null;
     }
 
-    public void MoveToFocusHexRow(int y)
+    private float zOffsetToTileRow;
+
+    public override void _Ready()
     {
-        //this.GlobalPosition = new(7, 6.6f, 3.05f + (y * 1.43f));
-        startLocation = this.GlobalPosition;
-        targetLocation = new(7, 6.6f, 6.45f + (y * 0.75f));
+        zOffsetToTileRow = GlobalPosition.Z - 3.75f;
+        GD.Print($"Offset detected: {zOffsetToTileRow}");
+    }
+
+    private Tween currentMovement;
+
+    public void MoveToFocusHexRow(int y, bool instant = false)
+    {
+        //startLocation = this.GlobalPosition;
+        //targetLocation = new(7, 6.4f, GridManager.GetAt(0, y).GlobalPosition.Z + zOffsetToTileRow);
+
+        if (currentMovement != null)
+        {
+            currentMovement.Stop();
+            currentMovement.Dispose();
+        }
+
+        Vector3 target = new(6, 4.5f, GridManager.GetNominalPosition(0, y).Z + zOffsetToTileRow);
+        if (instant)
+        {
+            GD.Print($"Snapping to target: {target}");
+            GlobalPosition = target;
+        }
+        else
+        {
+            GD.Print($"Tweening to target: {target}");
+
+            currentMovement = GetTree().CreateTween()
+                                    .SetTrans(Tween.TransitionType.Cubic)
+                                    .SetEase(Tween.EaseType.Out);
+            currentMovement.TweenProperty(this, "global_position", target, 1);
+            
+            currentMovement.Finished += () =>
+            {
+                currentMovement.Dispose();
+                currentMovement = null;
+            };
+        }
     }
 
     private Vector3 startLocation = default;
@@ -83,6 +120,12 @@ public partial class CameraInteraction : Camera3D
                             PlaySound(SOUND_CLICK);
                             currentSwapHex = hex;
                             currentSwapHex.IsSwapMode = true;
+                        }
+                        else if (currentSwapHex == hex)
+                        {
+                            PlaySound(SOUND_CLICK);
+                            currentSwapHex.IsSwapMode = false;
+                            currentSwapHex = null;
                         }
                         else
                         {
@@ -153,22 +196,31 @@ public partial class CameraInteraction : Camera3D
             hex.Hover();
         }
         currentRotateHex = hex;
+
+        if (currentSwapHex != null && !currentSwapHex.IsSwapMode)
+        {
+            currentSwapHex = null;
+        }
+        if (currentRotateHex != null && !currentRotateHex.IsRotationMode)
+        {
+            currentRotateHex = null;
+        }
     }
 
     public override void _Process(double delta)
     {
-        if (startLocation.DistanceTo(targetLocation) > 0.0001f)
-        {
-            var totalDistance = startLocation.DistanceTo(targetLocation);
-            if (Mathf.Abs(totalDistance) < 0.0001f)
-                return;
-
-            var speed = 3.0f;
-            var t = speed * (float)delta / totalDistance;
-            t = Mathf.Clamp(t, 0, 1);
-
-            Position = Position.Lerp(targetLocation, t);       
-        }
+        //if (startLocation.DistanceTo(targetLocation) > 0.0001f)
+        //{
+        //    var totalDistance = startLocation.DistanceTo(targetLocation);
+        //    if (Mathf.Abs(totalDistance) < 0.0001f)
+        //        return;
+        //
+        //    var speed = 3.0f;
+        //    var t = speed * (float)delta / totalDistance;
+        //    t = Mathf.Clamp(t, 0, 1);
+        //
+        //    Position = Position.Lerp(targetLocation, t);       
+        //}
     }
 
 

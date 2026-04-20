@@ -1,0 +1,38 @@
+[gd_scene format=3 uid="uid://l1v4ecjeylky"]
+
+[ext_resource type="Texture2D" uid="uid://bhvw8li2saiap" path="res://textures/circle.png" id="2_osfx8"]
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_uoplr"]
+transparency = 1
+shading_mode = 0
+vertex_color_use_as_albedo = true
+albedo_color = Color(1, 0, 0, 1)
+albedo_texture = ExtResource("2_osfx8")
+
+[sub_resource type="QuadMesh" id="QuadMesh_gxiwr"]
+orientation = 1
+
+[sub_resource type="Curve" id="Curve_t6pj1"]
+_data = [Vector2(0.41314554, 0), 0.0, 0.0, 0, 0, Vector2(0.71361506, 1), 0.0, 0.0, 0, 0]
+point_count = 2
+
+[sub_resource type="Gradient" id="Gradient_waksv"]
+colors = PackedColorArray(1, 1, 1, 1, 1, 1, 1, 0)
+
+[node name="DisruptionEffect" type="Node3D" unique_id=458380526]
+
+[node name="CPUParticles3D" type="CPUParticles3D" parent="." unique_id=1359792892]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.09960857, 0)
+material_override = SubResource("StandardMaterial3D_uoplr")
+lifetime = 1.5
+explosiveness = 0.7
+mesh = SubResource("QuadMesh_gxiwr")
+direction = Vector3(0, 1, 0)
+spread = 0.0
+gravity = Vector3(0, 0, 0)
+initial_velocity_min = 0.4
+initial_velocity_max = 0.4
+scale_amount_min = 0.4
+scale_amount_max = 0.4
+scale_amount_curve = SubResource("Curve_t6pj1")
+color_ramp = SubResource("Gradient_waksv")

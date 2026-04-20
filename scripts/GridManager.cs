@@ -1,4 +1,5 @@
 using Godot;
+using Microsoft.VisualBasic;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -127,6 +128,77 @@ public partial class GridManager : Node
         return (false, []);
     }
 
+    private IEnumerable<Hex> GetCurrentLevelHexes()
+    {
+        var startHex = hexStore.Values.Where(h => h.State.StateType == Hex.HexStateType.Start).OrderBy(h => h.Coordinates.Y).LastOrDefault();
+        if (startHex == null)
+        {
+            var totalStartHexes = hexStore.Values.Count(h => h.State.StateType == Hex.HexStateType.Start);
+
+            GD.Print($"GetCurrentLevelHexes() -> startHex null, total {totalStartHexes}");
+
+            return [];
+        }
+        var result = hexStore.Where(d => d.Key.y > startHex.Coordinates.Y).Select(d => d.Value);
+        if (result.Any(h => h == null))
+        {
+            GD.Print("Null Hex found!");
+        }
+        return result.Where(h => h != null);
+    }
+
+    public void UpdateDisruptedHexes()
+    {
+        foreach (var hex in GetCurrentLevelHexes())
+        {
+            var disrupted = IsHexDisrupted(hex);
+            hex.UpdateDisruptedVisuals(disrupted);
+        }
+    }
+
+    private double disruptorUpdate = 0;
+
+    public override void _PhysicsProcess(double delta)
+    {
+        disruptorUpdate += delta;
+
+        if (disruptorUpdate >= 0.25)
+        {
+            disruptorUpdate = 0;
+            UpdateDisruptedHexes();
+        }
+    }
+
+
+    public bool IsHexDisrupted(Hex hex)
+    {
+        if (hex == null)
+            return false;
+
+        foreach (var disruptorCoors in GetCurrentLevelHexes().Where(h => h.State.StateType == Hex.HexStateType.Disruptor).Select(h => h.Coordinates))
+        {
+            var neighbours = GetNeighbours(hex.Coordinates.X, hex.Coordinates.Y).Where(h => h != null);
+
+            if (neighbours.Any(h => h.State.StateType == Hex.HexStateType.Disruptor))
+            {
+                return true;
+            }
+
+            foreach (var coords in neighbours.Select(n => n.Coordinates))
+            {
+                var result = CheckConnection((coords.X, coords.Y), 
+                                            (disruptorCoors.X, disruptorCoors.Y));
+
+                if (result.Success)
+                {
+                    return true;
+                }
+            }
+        }
+
+        return false;
+    }
+
     public void DeactivateUnused(int y)
     {
         foreach (var hex in hexStore.Values.Where(h => h.Coordinates.Y <= y && h.State.CanInteract()))
@@ -171,4 +243,19 @@ public partial class GridManager : Node
         }
     }
 
+    private float stepX = 0.43f;
+    private float stepY = 0.75f;
+    public Vector3 GetNominalPosition(int x, int y)
+    {
+        var xPos = stepX * 2 * x;
+        var yPos = 0;
+        var zPos = stepY * y;
+
+        if (y % 2 == 0)
+        {
+            xPos += stepX;
+        }
+
+        return new(xPos, yPos, zPos);
+    }
 }

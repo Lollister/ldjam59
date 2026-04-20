@@ -33,6 +33,8 @@ public partial class Hex : MeshInstance3D
 
     [Export] public Node3D StartMarker { get; set; }
     [Export] public Node3D EndMarker { get; set; }
+    [Export] public Node3D DisruptorMarker { get; set; }
+    [Export] public Node3D DisruptionEffect { get; set; }
 
     [Export] public HexStateType StartType { get; set; }
 
@@ -45,6 +47,7 @@ public partial class Hex : MeshInstance3D
         Connection,
         Start,
         End,
+        Disruptor,
     }
 
     public record HexState(int ConnectionType, int Rotation, HexStateType StateType)
@@ -53,7 +56,7 @@ public partial class Hex : MeshInstance3D
         public static HexState Random(bool allowEmpty = false) => new HexState(GD.RandRange(allowEmpty ? 0 : 1, 3), GD.RandRange(0, 5), HexStateType.Connection);
         public HexState Rotated(int direction) => new (ConnectionType, (Rotation + 6 + direction) % 6, StateType);
 
-        public void UpdateView(Node3D[] connectors, Node3D startMarker, Node3D endMarker)
+        public void UpdateView(Node3D[] connectors, Node3D startMarker, Node3D endMarker, Node3D disruptorMarker)
         {
             foreach (var connector in connectors)
             {
@@ -61,6 +64,7 @@ public partial class Hex : MeshInstance3D
             }
             startMarker.Visible = false;
             endMarker.Visible = false;
+            disruptorMarker.Visible = false;
 
             if (StateType == HexStateType.Connection)
             {
@@ -76,6 +80,10 @@ public partial class Hex : MeshInstance3D
             else if (StateType == HexStateType.End)
             {
                 endMarker.Visible = true;
+            }
+            else if (StateType == HexStateType.Disruptor)
+            {
+                disruptorMarker.Visible = true;
             }
         }
 
@@ -107,11 +115,22 @@ public partial class Hex : MeshInstance3D
         }
     }
 
+    public void UpdateDisruptedVisuals(bool disrupted)
+    {
+        DisruptionEffect.Visible = disrupted;
+        ApplyForWireMeshes(mesh =>
+        {
+            if (mesh.MaterialOverride != Materials["wire_solved"])
+            {
+                mesh.MaterialOverride = disrupted ? Materials["wire_disrupted"] : Materials["wire"];
+            }
+        });
+    }
 
     public void UpdateState(HexState state)
     {
         State = state;
-        State.UpdateView(Connectors, StartMarker, EndMarker);
+        State.UpdateView(Connectors, StartMarker, EndMarker, DisruptorMarker);
         NodeLabel.Text = Name.ToString().Replace("Hex_", "").Replace("_", " ");
     }
 
@@ -122,6 +141,7 @@ public partial class Hex : MeshInstance3D
 
     public void SetSolved()
     {
+        DisruptionEffect.Visible = false;
         ApplyForWireMeshes(mesh =>
         {
             mesh.MaterialOverride = Materials["wire_solved"];
@@ -185,15 +205,17 @@ public partial class Hex : MeshInstance3D
     {
         HoverFrames = Mathf.Max(0, HoverFrames - 1);
         SwapAnimationFrames = Mathf.Max(0, SwapAnimationFrames - 1);
-        DropDelay--;
-
-        //if (DropDelay < -300)
-        //{
-        //    //naive "lets just destroy it when it was dropped for X amount of time..."
-        //    //can lead to issues in the GridManager since we now have potentially destroyed references
-        //    QueueFree();
-        //}
-        
+        if (IsDropped)
+        {
+            DropDelay--;
+            
+            if (DropDelay < -300)
+            {
+                //naive "lets just destroy it when it was dropped for X amount of time..."
+                //can lead to issues in the GridManager since we now have potentially destroyed references
+                QueueFree();
+            }
+        }
     }
 
     public override void _Process(double delta)
@@ -211,7 +233,7 @@ public partial class Hex : MeshInstance3D
             {
                 factor = 1 - (SwapAnimationFrames / (SwapAnimationDuration / 2f));
             }
-            Scale = Vector3.One * factor;
+            Scale = Vector3.One * Mathf.Max(factor, 0.0001f);
         }
         else
         {
@@ -281,5 +303,7 @@ public partial class Hex : MeshInstance3D
         State.IsLocked = true;
         IsDropped = true;
         DropDelay = (30 - Math.Abs(Coordinates.X) + Coordinates.Y) * 3;
+        IsSwapMode = false;
+        IsRotationMode = false;
     }
 }
